@@ -1,11 +1,11 @@
 path:
-  raw_path: "/content/music_recognition/CHAD"
-  preprocessed_path: "/content/music_recognition/preprocessed"
-  temp_dir: "/content/music_recognition/temp_dir"
-  visualization_path: "/content/music_recognition/visualization"
+  raw_path: "/home/thinv/hum2song/chad"
+  preprocessed_path: "/home/thinv/hum2song/preprocessed"
+  temp_dir: "/home/thinv/hum2song/temp_dir"
+  visualization_path: "/home/thinv/hum2song/visualization"
 
 preprocessing:
-  val_size: 512
+  val_size: 57
   split_win_size: 610
   split_stride_size: 32
   audio:

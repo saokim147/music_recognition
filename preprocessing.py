@@ -46,7 +46,7 @@ def process_data(dataset, in_dir, out_dir, sampling_rate, max_wav_value, STFT):
         in_list = []
         out_list = []
         for file in files:
-            if file[-4:] != ".mp3" or file[-4:]!=".wav":
+            if file[-4:] != ".mp3" and file[-4:] != ".wav":
                 continue
             audio_path = os.path.join(in_dir, dataset, sub, file)
             out_path = os.path.join(out_dir, dataset, sub, f"{file[:-4]}.npy")
@@ -63,7 +63,6 @@ def main(config):
     out_dir = config["path"]["preprocessed_path"]
     sampling_rate = config["preprocessing"]["audio"]["sampling_rate"]
     max_wav_value = config["preprocessing"]["audio"]["max_wav_value"]
-    val_size = config["preprocessing"]["val_size"]
 
     STFT = Audio.stft.TacotronSTFT(
             config["preprocessing"]["stft"]["filter_length"],

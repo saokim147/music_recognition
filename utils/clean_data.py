@@ -86,9 +86,12 @@ def clean_train_set(data_path, out_dir):
         
         for song in song_list:
             sound_path = os.path.join(data_path, song[0])
-            song_cleaned_path = os.path.join(out_dir, song[0])
+            song_cleaned_path = os.path.join(out_dir, "train", song[0])
             hum_path = os.path.join(data_path, song[1])
-            hum_cleaned_path = os.path.join(out_dir, song[1])
+            hum_cleaned_path = os.path.join(out_dir, "train", song[1])
+            # Ensure parent directories exist
+            os.makedirs(os.path.dirname(song_cleaned_path), exist_ok=True)
+            os.makedirs(os.path.dirname(hum_cleaned_path), exist_ok=True)
             song_res = clean_file(sound_path, song_cleaned_path, type="song", check_valid=True, max_dur=min_dur * 1000)
             hum_res = clean_file(hum_path, hum_cleaned_path, type="hum", check_valid=True)
 

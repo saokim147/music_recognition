@@ -26,11 +26,12 @@ def main(config):
         for row in csv_reader:
             if line_count > 0:
                 music_id = row[0]
-                song_id = row[1].split("/")[-1].split(".")[0]
+                song_filename = row[1].split("/")[-1].split(".")[0]  # e.g., 0bc7f9ae9b644f29_2_0d7893612d6572a1
+                hum_filename = row[2].split("/")[-1].split(".")[0]   # e.g., hum_0bc7f9ae9b644f29_2_1ded76c36df1388a
                 if music_id not in unique_music.keys():
-                    unique_music[music_id] = [song_id]
+                    unique_music[music_id] = [(song_filename, hum_filename)]
                 else:
-                    unique_music[music_id].append(song_id)
+                    unique_music[music_id].append((song_filename, hum_filename))
             line_count += 1
         print(f'Processed {line_count} lines.')
     val_set = random.sample(list(unique_music.keys()), k=val_size)
@@ -45,18 +46,19 @@ def main(config):
     
     count = 0
     for id in val_set:
-        for file in unique_music[id]:
-            # print(f'Move file {os.path.join(indir, "train", "song", file + ".npy")} to val set')
-            if not os.path.isfile(os.path.join(indir, "train", "song", file + ".npy")) \
-                or not os.path.join(indir, "train", "hum", file + ".npy"):
-                print(f'Not found {file + ".npy"}')
+        for song_filename, hum_filename in unique_music[id]:
+            # print(f'Move file {os.path.join(indir, "train", "song", song_filename + ".npy")} to val set')
+            song_path = os.path.join(indir, "train", "song", song_filename + ".npy")
+            hum_path = os.path.join(indir, "train", "hum", hum_filename + ".npy")
+
+            if not os.path.isfile(song_path) or not os.path.isfile(hum_path):
+                print(f'Not found: song={song_filename}.npy or hum={hum_filename}.npy')
                 continue
-            os.rename(os.path.join(indir, "train", "song", file + ".npy"), 
-                        os.path.join(indir, "val", "song", file + ".npy"))
-            os.rename(os.path.join(indir, "train", "hum", file + ".npy"), 
-                        os.path.join(indir, "val", "hum", file + ".npy"))
+
+            os.rename(song_path, os.path.join(indir, "val", "song", song_filename + ".npy"))
+            os.rename(hum_path, os.path.join(indir, "val", "hum", hum_filename + ".npy"))
             count += 1
-    print(f"Count: {count} filse")
+    print(f"Count: {count} files")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

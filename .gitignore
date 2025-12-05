@@ -148,3 +148,4 @@ cython_debug/
 !full_data_val.txt
 !full_data_train.txt
 *.md
+CHAD/
