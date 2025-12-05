@@ -1,8 +1,8 @@
 path:
-  raw_path: "/content/music_recognition/chad_dataset"
-  preprocessed_path: "/content/music_recognition/preprocessed"
-  temp_dir: "/content/music_recognition/temp_dir"
-  visualization_path: "/content/music_recognition/visualization"
+  raw_path: "chad_dataset"
+  preprocessed_path: "preprocessed"
+  temp_dir: "temp_dir"
+  visualization_path: "visualization"
 
 preprocessing:
   val_size: 57

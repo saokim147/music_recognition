@@ -20,8 +20,8 @@ def read_meta_data(csv_path):
         for row in csv_reader:
             if line_count > 0:
                 music_id = row[0]
-                song_path = row[1]
-                hum_path = row[2]
+                song_path = row[2]
+                hum_path = row[3]
                 data_info.append([music_id, song_path, hum_path])
             line_count += 1
         print(f'Processed {line_count} lines.')

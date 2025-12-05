@@ -36,8 +36,8 @@ def write_meta_data(header, data, csv_path):
 def add_valid_interval_field(data_info, raw_path):
     for idx in tqdm(range(len(data_info))):
         row = data_info[idx]
-        song_path = os.path.join(raw_path, row[1])
-        hum_path = os.path.join(raw_path, row[2])
+        song_path = os.path.join(raw_path,"train",row[1])
+        hum_path = os.path.join(raw_path, "train", row[2])
         if not os.path.isfile(song_path) or not os.path.isfile(hum_path):
             if not os.path.isfile(song_path):
                 logging.warn(f"Not found {song_path}")
