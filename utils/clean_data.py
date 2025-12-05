@@ -34,9 +34,6 @@ def clean_file(sound_path: str, cleaned_path: str, type="song", check_valid=True
 
     if max_dur is not None:
         trimmed_sound = trimmed_sound[:max_dur]
-
-    ## complementary: fix bug preprocessing unusual files
-    ## without these codes, preprocessing will break on private test preprocessing
     if check_valid:
         if not is_valid_sound(trimmed_sound, type):
             return False
@@ -58,14 +55,7 @@ def _create_data_dict(data_path):
         music_id = row[0]
         song_path = row[1]
         hum_path = row[2]
-        try:
-            song_valid = row[5]
-            hum_valid = row[6]
-        except IndexError:
-            continue
-        
-        sound_data = [song_path, hum_path, song_valid, hum_valid]
-
+        sound_data = [song_path, hum_path]
         if music_id in data_dict.keys():
             data_dict[music_id].append(sound_data)
         else:
@@ -89,7 +79,6 @@ def clean_train_set(data_path, out_dir):
             song_cleaned_path = os.path.join(out_dir, "train", song[0])
             hum_path = os.path.join(data_path, song[1])
             hum_cleaned_path = os.path.join(out_dir, "train", song[1])
-            # Ensure parent directories exist
             os.makedirs(os.path.dirname(song_cleaned_path), exist_ok=True)
             os.makedirs(os.path.dirname(hum_cleaned_path), exist_ok=True)
             song_res = clean_file(sound_path, song_cleaned_path, type="song", check_valid=True, max_dur=min_dur * 1000)
@@ -118,14 +107,13 @@ def clean_test_set(data_path, out_dir, test_type="public_test"):
         print(f'cleaning {sub}... ')
         pool = mp.Pool()
         for file in files:
-            if file[-4:] != ".mp3":
+            if file[-4:] != ".mp3" and file[-4:] != ".wav":
                 continue
             # preprocess audio
             sound_path = os.path.join(data_path, test_type, sub, file)
             cleaned_path = os.path.join(out_dir, test_type, sub, file)
             # res = clean_file(sound_path, cleaned_path, type=sub, check_valid=False)
             pool.apply_async(clean_file, args = (sound_path, cleaned_path, sub, False, ))
-            # assert isinstance(res, str), f"Fail at {sound_path}"
         pool.close()
         pool.join()
         ##
