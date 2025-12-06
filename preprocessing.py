@@ -11,12 +11,8 @@ from shutil import copyfile
 import audio as Audio
 import joblib
 
-try:
-    from utils.clean_data import clean_train_set, clean_test_set
-    from utils.copy_files import copy_fail_cleaning_data
-except ModuleNotFoundError:
-    from clean_data import clean_train_set, clean_test_set
-    from copy_files import copy_fail_cleaning_data
+
+from utils.clean_data import clean_train_set
 
 import warnings
 warnings.filterwarnings('ignore')

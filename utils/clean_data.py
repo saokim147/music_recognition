@@ -28,8 +28,8 @@ def trim_sil(sound: AudioSegment):
     trimmed_sound  = sound[sound_interval[0]:sound_interval[1]]
     return trimmed_sound
 
-def clean_file(sound_path: str, cleaned_path: str, type="song", check_valid=True, max_dur=None):
-    sound = AudioSegment.from_file(sound_path, format="mp3")
+def clean_file(sound_path: str, cleaned_path: str, type="song", check_valid=True, max_dur=None,format:str="mp3"):
+    sound = AudioSegment.from_file(sound_path, format)
     trimmed_sound = trim_sil(sound)
 
     if max_dur is not None:
@@ -40,7 +40,7 @@ def clean_file(sound_path: str, cleaned_path: str, type="song", check_valid=True
     else:
         if not is_valid_sound(trimmed_sound, type):
             trimmed_sound = sound
-    ##
+    
 
     normalizedsound = effects.normalize(trimmed_sound)          
     normalizedsound.export(cleaned_path, format="mp3")
@@ -81,8 +81,8 @@ def clean_train_set(data_path, out_dir):
             hum_cleaned_path = os.path.join(out_dir, "train", song[1])
             os.makedirs(os.path.dirname(song_cleaned_path), exist_ok=True)
             os.makedirs(os.path.dirname(hum_cleaned_path), exist_ok=True)
-            song_res = clean_file(sound_path, song_cleaned_path, type="song", check_valid=True, max_dur=min_dur * 1000)
-            hum_res = clean_file(hum_path, hum_cleaned_path, type="hum", check_valid=True)
+            song_res = clean_file(sound_path, song_cleaned_path, type="song", check_valid=True, max_dur=min_dur * 1000, format="mp3")
+            hum_res = clean_file(hum_path, hum_cleaned_path, type="hum", check_valid=True, format="wav")
 
             if isinstance(song_res, str) and isinstance(hum_res, str):
                 continue

@@ -30,14 +30,14 @@ def write_meta_data(header, data, csv_path):
         writer = csv.writer(f)
         # write the header
         writer.writerow(header)
-        # write multiple rows
+    # write multiple row
         writer.writerows(data)
 
 def add_valid_interval_field(data_info, raw_path):
     for idx in tqdm(range(len(data_info))):
         row = data_info[idx]
-        song_path = os.path.join(raw_path,"train",row[1])
-        hum_path = os.path.join(raw_path, "train", row[2])
+        song_path = os.path.join(raw_path,row[1])
+        hum_path = os.path.join(raw_path, row[2])
         if not os.path.isfile(song_path) or not os.path.isfile(hum_path):
             if not os.path.isfile(song_path):
                 logging.warn(f"Not found {song_path}")
@@ -46,7 +46,7 @@ def add_valid_interval_field(data_info, raw_path):
             continue
     
         song = AudioSegment.from_file(song_path, format="mp3")
-        hum = AudioSegment.from_file(hum_path, format="mp3")
+        hum = AudioSegment.from_file(hum_path, format="wav")
         song_org_dur = len(song) / 1000
         hum_org_dur = len(hum) / 1000
         song_interval = get_valid_interval(song)
@@ -86,13 +86,13 @@ def main(config):
     indir = config["path"]["preprocessed_path"]
 
     # eda train
-    data_info = read_meta_data(os.path.join(raw_path, "train", "train_meta.csv"))
+    data_info = read_meta_data(os.path.join(raw_path,  "train_meta.csv"))
     data_info = add_valid_interval_field(data_info, raw_path)
 
     header = ["music_id", "song_path", "hum_path", 
             "song_org_dur", "hum_org_dur", 
             "song_valid_interval", "hum_valid_interval"]
-    write_meta_data(header, data_info, os.path.join(indir, "train", "eda_train_meta.csv"))
+    write_meta_data(header, data_info, os.path.join(indir,  "eda_train_meta.csv"))
 
     # eda test
     song_info, hum_info = create_meta_data_test(os.path.join(raw_path, "public_test"))
