@@ -11,10 +11,12 @@ from shutil import copyfile
 import audio as Audio
 import joblib
 
-
 from utils.clean_data import clean_train_set
 
+
 import warnings
+
+from utils.copy_files import copy_fail_cleaning_data
 warnings.filterwarnings('ignore')
 
 def process(audio, max_wav_value, STFT):
@@ -24,9 +26,14 @@ def process(audio, max_wav_value, STFT):
     return mel_spectrogram.T
 
 def process_file(audio_path, out_path, sampling_rate, max_wav_value, STFT):
-    audio, _ = librosa.load(audio_path, sr=sampling_rate)
-    spec = process(audio, max_wav_value, STFT)
-    np.save(out_path, spec)
+    try:
+        audio, _ = librosa.load(audio_path, sr=sampling_rate)
+        spec = process(audio, max_wav_value, STFT)
+        np.save(out_path, spec)
+        return True, None
+    except Exception as e:
+        error_msg = f"Error processing {audio_path}: {type(e).__name__}: {str(e)}"
+        return False, error_msg
 
 def process_data(dataset, in_dir, out_dir, sampling_rate, max_wav_value, STFT):
     random.seed(1234)
@@ -49,9 +56,34 @@ def process_data(dataset, in_dir, out_dir, sampling_rate, max_wav_value, STFT):
             in_list.append(audio_path)
             out_list.append(out_path)
 
-        jobs = [ joblib.delayed(process_file)(i, o, sampling_rate, max_wav_value, STFT) 
+        jobs = [ joblib.delayed(process_file)(i, o, sampling_rate, max_wav_value, STFT)
                                                 for i,o in zip(in_list, out_list) ]
-        joblib.Parallel(n_jobs=4, verbose=1)(jobs)
+        results = joblib.Parallel(n_jobs=4, verbose=1)(jobs)
+
+        # Track successful and failed files
+        successful = []
+        failed = []
+        for (audio_path, out_path), (success, error_msg) in zip(zip(in_list, out_list), results):
+            if success:
+                successful.append(audio_path)
+            else:
+                failed.append((audio_path, error_msg))
+
+        print(f"\n{'='*80}")
+        print(f"Processing summary for {dataset}/{sub}:")
+        print(f"  Total files: {len(in_list)}")
+        print(f"  Successful: {len(successful)}")
+        print(f"  Failed: {len(failed)}")
+
+        if failed:
+            print(f"\n{'='*80}")
+            print(f"FAILED FILES ({len(failed)}):")
+            print(f"{'='*80}")
+            for audio_path, error_msg in failed:
+                filename = os.path.basename(audio_path)
+                print(f"  ❌ {filename}")
+                print(f"     {error_msg}")
+            print(f"{'='*80}\n")
 
 def main(config):
     in_dir = config["path"]["raw_path"]
@@ -69,14 +101,12 @@ def main(config):
             config["preprocessing"]["mel"]["mel_fmin"],
             config["preprocessing"]["mel"]["mel_fmax"],
         )
-
     clean_train_set(in_dir, out_dir=temp_dir)
-    #clean_test_set(in_dir, out_dir=temp_dir)
-    #copy_fail_cleaning_data(in_dir, temp_dir)
+    copy_fail_cleaning_data(in_dir, temp_dir)
     process_data("train", temp_dir, out_dir, sampling_rate, max_wav_value, STFT)
-    #process_data("public_test", temp_dir, out_dir, sampling_rate, max_wav_value, STFT)
     copyfile(os.path.join(in_dir, "train_meta.csv"),
               os.path.join(out_dir, "train_meta.csv"))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
