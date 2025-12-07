@@ -44,10 +44,10 @@ if __name__ == '__main__':
 
     if opt.backbone == 'resnet18':
         model = resnet_face18(use_se=opt.use_se)
-    elif opt.backbone == 'resnet34':
-        model = resnet34()
-    elif opt.backbone == 'resnet50':
-        model = resnet50()
+    # elif opt.backbone == 'resnet34':
+    #     model = resnet34()
+    # elif opt.backbone == 'resnet50':
+    #     model = resnet50()
 
     if opt.metric == 'add_margin':
         metric_fc = AddMarginProduct(512, opt.num_classes, s=30, m=0.35)
@@ -74,8 +74,6 @@ if __name__ == '__main__':
     start = time.time()
     mrr_best = 0
     for i in range(1, opt.max_epoch + 1):
-        scheduler.step()
-
         model.train()
         for ii, data in enumerate(trainloader):
             data_input, label = data
@@ -110,3 +108,5 @@ if __name__ == '__main__':
             if mrr > mrr_best:
                 mrr_best = mrr
                 save_model(model, opt.checkpoints_path, opt.backbone, 'best')
+
+        scheduler.step()
