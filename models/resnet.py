@@ -1,22 +1,15 @@
+from typing import Optional
+import torch
 import torch.nn as nn
-import torch.utils.model_zoo as model_zoo
 
-
-model_urls = {
-    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth'
-}
-
-
-def conv3x3(in_planes, out_planes, stride=1):
-    """3x3 convolution with padding"""
+def conv3x3(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
 
-
 class BasicBlock(nn.Module):
-    expansion = 1
+    expansion: int = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, **kwargs):
+    def __init__(self, inplanes: int, planes: int, stride: int = 1, downsample: Optional[nn.Module] = None) -> None:
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = nn.BatchNorm2d(planes)
@@ -26,7 +19,7 @@ class BasicBlock(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         residual = x
 
         out = self.conv1(x)
@@ -214,19 +207,14 @@ class ResNet(nn.Module):
     def __init__(self, block, layers):
         self.inplanes = 64
         super(ResNet, self).__init__()
-        # self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
-        #                        bias=False)
         self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1,
                                bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
-        # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0], stride=2)
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
-        # self.avgpool = nn.AvgPool2d(8, stride=1)
-        # self.fc = nn.Linear(512 * block.expansion, num_classes)
         self.fc5 = nn.Linear(512 * 8 * 8, 512)
 
         for m in self.modules():
@@ -257,14 +245,10 @@ class ResNet(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        # x = self.maxpool(x)
-
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-        # x = nn.AvgPool2d(kernel_size=x.size()[2:])(x)
-        # x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc5(x)
 
@@ -272,14 +256,7 @@ class ResNet(nn.Module):
 
 
 def resnet18(pretrained=False, **kwargs):
-    """Constructs a ResNet-18 model.
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-    """
-    model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
-    if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet18']))
-    return model
+    return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
 
 
 class WrapModule(nn.Module):
@@ -287,7 +264,7 @@ class WrapModule(nn.Module):
         super(WrapModule, self).__init__()
         self.module = ResNetFace(block, layers, use_se, **kwargs)
 
-    def _make_layer(self, block, planes, blocks, stride=1):
+    def _make_layer(self, block, planes, blocks):
         return self.module._make_layer(block, planes, blocks, stride=1)
 
     def forward(self, x):
@@ -299,6 +276,26 @@ def resnet_face18(use_se=True, **kwargs):
     return model
 
 
+def resnet_face34(use_se=True, **kwargs):
+    model = ResNetFace(IRBlock, [3, 4, 6, 3], use_se=use_se, **kwargs)
+    return model
+
+
+def resnet_face50(use_se=True, **kwargs):
+    model = ResNetFace(IRBlock, [3, 4, 14, 3], use_se=use_se, **kwargs)
+    return model
+
+
 def wrap_resnet_face18(use_se=True, **kwargs):
     model = WrapModule(IRBlock, [2, 3, 4, 3], use_se=use_se, **kwargs)
+    return model
+
+
+def wrap_resnet_face34(use_se=True, **kwargs):
+    model = WrapModule(IRBlock, [3, 4, 6, 3], use_se=use_se, **kwargs)
+    return model
+
+
+def wrap_resnet_face50(use_se=True, **kwargs):
+    model = WrapModule(IRBlock, [3, 4, 14, 3], use_se=use_se, **kwargs)
     return model
