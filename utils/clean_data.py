@@ -1,12 +1,9 @@
 from pydub import AudioSegment, effects
 import os
 import multiprocessing as mp
-try:
-    from utils.get_valid_interval import get_valid_interval
-    from utils.eda import read_meta_data, add_valid_interval_field
-except ModuleNotFoundError:
-    from get_valid_interval import get_valid_interval
-    from eda import read_meta_data, add_valid_interval_field   
+from utils.get_valid_interval import get_valid_interval
+from utils.eda import read_meta_data, add_valid_interval_field
+
 from tqdm import tqdm
 
 def is_song_valid_dur(sound: AudioSegment):
@@ -29,24 +26,18 @@ def trim_sil(sound: AudioSegment):
     return trimmed_sound
 
 def clean_file(sound_path: str, cleaned_path: str, type="song", check_valid=True, max_dur=None):
-    # Determine format based on file extension
     sound_format = "wav" if sound_path.endswith(".wav") else "mp3"
     sound = AudioSegment.from_file(sound_path, format=sound_format)
     trimmed_sound = trim_sil(sound)
 
     if max_dur is not None:
         trimmed_sound = trimmed_sound[:max_dur]
-
-    ## complementary: fix bug preprocessing unusual files
-    ## without these codes, preprocessing will break on private test preprocessing
     if check_valid:
         if not is_valid_sound(trimmed_sound, type):
             return False
     else:
         if not is_valid_sound(trimmed_sound, type):
             trimmed_sound = sound
-    ##
-
     normalizedsound = effects.normalize(trimmed_sound)          
     normalizedsound.export(cleaned_path, format="mp3")
     return cleaned_path
@@ -109,29 +100,3 @@ def clean_train_set(data_path, out_dir):
                     os.remove(song_res)
                 if isinstance(hum_res, str):
                     os.remove(hum_res)
-
-def clean_test_set(data_path, out_dir, test_type="public_test"):
-    os.makedirs(os.path.join(out_dir))
-    os.makedirs(os.path.join(out_dir, test_type))
-    os.makedirs(os.path.join(out_dir, test_type, "full_song"))
-    os.makedirs(os.path.join(out_dir, test_type, "hum"))
-
-    subfolder = ["hum", "full_song"]
-    for sub in subfolder:
-        files = os.listdir(os.path.join(data_path, test_type, sub))
-        
-        ## complementary: Multi-processing
-        print(f'cleaning {sub}... ')
-        pool = mp.Pool()
-        for file in files:
-            if file[-4:] != ".mp3":
-                continue
-            # preprocess audio
-            sound_path = os.path.join(data_path, test_type, sub, file)
-            cleaned_path = os.path.join(out_dir, test_type, sub, file)
-            # res = clean_file(sound_path, cleaned_path, type=sub, check_valid=False)
-            pool.apply_async(clean_file, args = (sound_path, cleaned_path, sub, False, ))
-            # assert isinstance(res, str), f"Fail at {sound_path}"
-        pool.close()
-        pool.join()
-        ##
