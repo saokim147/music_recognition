@@ -1,6 +1,6 @@
 class Config(object):
     env = 'default'
-    backbone = 'resnet18'
+    backbone = 'resnet34'
     classify = 'softmax'
     num_classes = 5000
     metric = 'arc_margin'

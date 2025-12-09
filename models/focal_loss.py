@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Source: arcface  by ronghuaiyang https://github.com/ronghuaiyang/arcface-pytorch
-"""
-
 import torch
 import torch.nn as nn
 

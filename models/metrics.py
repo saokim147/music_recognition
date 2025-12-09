@@ -1,7 +1,3 @@
-"""
-Source: arcface  by ronghuaiyang https://github.com/ronghuaiyang/arcface-pytorch
-"""
-
 from __future__ import print_function
 from __future__ import division
 import torch
