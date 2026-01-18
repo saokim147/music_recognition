@@ -81,6 +81,7 @@ def main(cfg: Config) -> None:
 
     start = time.time()
     mrr_best = 0
+    inference_times = []
     for i in range(1, cfg.training.max_epoch + 1):
         model.train()
         for ii, data in enumerate(trainloader):
@@ -111,13 +112,24 @@ def main(cfg: Config) -> None:
             save_model(model, cfg.paths.checkpoints_path, cfg.model.backbone, 'latest')
             model.eval()
             data_val = read_val(cfg.paths.val_list, cfg.paths.train_root)
+            inference_start = time.time()
             mrr = mrr_score(model, data_val, tuple(cfg.data.input_shape))
-            print(f'epoch {i}: MRR= {mrr}')
+            inference_time = time.time() - inference_start
+            inference_times.append(inference_time)
+            print(f'epoch {i}: MRR= {mrr}, inference time= {inference_time:.2f}s')
             if mrr > mrr_best:
                 mrr_best = mrr
                 save_model(model, cfg.paths.checkpoints_path, cfg.model.backbone, 'best')
 
         scheduler.step()
+
+    # Print average inference time
+    if inference_times:
+        avg_inference_time = sum(inference_times) / len(inference_times)
+        print(f'\n=== Training Complete ===')
+        print(f'Total validation runs: {len(inference_times)}')
+        print(f'Average inference time: {avg_inference_time:.2f}s')
+        print(f'Best MRR: {mrr_best:.4f}')
 
 
 if __name__ == '__main__':
