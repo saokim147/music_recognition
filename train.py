@@ -31,14 +31,7 @@ def main(cfg: Config) -> None:
         cfg: Hydra configuration object with type hints from Config schema
     """
 
-    # Print configuration
-    print("Configuration:")
-    print(OmegaConf.to_yaml(cfg))
-
-    if cfg.display:
-        visualizer = Visualizer()
-    device = torch.device("cuda")
-
+    device = torch.device('cuda' if cfg.training.use_gpu else 'cpu')
     train_dataset = Dataset(cfg.paths.train_root, cfg.paths.train_list, phase='train',
                             input_shape=tuple(cfg.data.input_shape),
                             mp3aug_ratio=cfg.data.mp3aug_ratio, npy_aug=cfg.data.npy_aug)
@@ -46,8 +39,6 @@ def main(cfg: Config) -> None:
                                   batch_size=cfg.data.train_batch_size,
                                   shuffle=True,
                                   num_workers=cfg.data.num_workers)
-    val_path = os.path.join(cfg.paths.train_root, cfg.paths.val_list)
-
     print('{} train iters per epoch:'.format(len(trainloader)))
 
     if cfg.loss.type == 'focal_loss':

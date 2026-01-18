@@ -1,5 +1,5 @@
 """Typed configuration schema for Hydra."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Tuple
 
 
@@ -79,11 +79,11 @@ class Config:
     display: bool = False
     finetune: bool = False
 
-    model: ModelConfig = ModelConfig()
-    metric: MetricConfig = MetricConfig()
-    loss: LossConfig = LossConfig()
-    paths: PathsConfig = PathsConfig()
-    data: DataConfig = DataConfig()
-    optimizer: OptimizerConfig = OptimizerConfig()
-    scheduler: SchedulerConfig = SchedulerConfig()
-    training: TrainingConfig = TrainingConfig()
+    model: ModelConfig = field(default_factory=ModelConfig)
+    metric: MetricConfig = field(default_factory=MetricConfig)
+    loss: LossConfig = field(default_factory=LossConfig)
+    paths: PathsConfig = field(default_factory=PathsConfig)
+    data: DataConfig = field(default_factory=DataConfig)
+    optimizer: OptimizerConfig = field(default_factory=OptimizerConfig)
+    scheduler: SchedulerConfig = field(default_factory=SchedulerConfig)
+    training: TrainingConfig = field(default_factory=TrainingConfig)
