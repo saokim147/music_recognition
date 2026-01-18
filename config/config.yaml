@@ -1,0 +1,63 @@
+# Hydra configuration for music recognition training
+defaults:
+  - _self_
+
+# Environment settings
+env: default
+
+# Model architecture configuration
+model:
+  backbone: resnet34
+  classify: softmax
+  num_classes: 5000
+  use_se: false
+
+# Metric learning configuration
+metric:
+  type: arc_margin  # Options: 'arc_margin', 'add_margin', 'sphere', null
+  easy_margin: false
+
+# Loss function configuration
+loss:
+  type: focal_loss  # Options: 'focal_loss', 'cross_entropy'
+
+# Data paths
+paths:
+  meta_train: /content/music_recognition/preprocessed/train_meta.csv
+  train_root: /content/music_recognition/preprocessed
+  train_list: /content/music_recognition/full_data_train.txt
+  val_list: /content/music_recognition/full_data_val.txt
+  checkpoints_path: /content/music_recognition/checkpoints
+  debug_file: /tmp/debug
+  result_file: /result/submission.csv
+
+# Data processing configuration
+data:
+  input_shape: [630, 80]
+  train_batch_size: 32
+  num_workers: 0
+  mp3aug_ratio: 1.0
+  npy_aug: true
+
+# Optimizer configuration
+optimizer:
+  type: sgd  # Options: 'sgd', 'adam'
+  lr: 0.01
+  weight_decay: 0.1
+
+# Learning rate scheduler
+scheduler:
+  lr_step: 10
+  lr_decay: 0.5
+
+# Training configuration
+training:
+  max_epoch: 100
+  print_freq: 100
+  save_interval: 1
+  use_gpu: true
+  gpu_id: "0, 1"
+
+# Display and debugging
+display: false
+finetune: false

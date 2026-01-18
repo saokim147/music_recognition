@@ -6,3 +6,4 @@ pydub
 faiss-gpu
 torchaudio >= 0.7
 WavAugment
+hydra-core

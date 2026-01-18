@@ -150,3 +150,9 @@ cython_debug/
 *.md
 CHAD/
 myenv/
+CLAUDE.md
+
+# Hydra outputs
+outputs/
+multirun/
+.hydra/

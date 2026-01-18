@@ -2,7 +2,10 @@ import os, json, faiss
 from utils.utils import *
 from tqdm import tqdm
 from models.resnet import *
-from config.config import Config
+from models.model_registry import get_model
+import hydra
+from omegaconf import DictConfig
+from config.config_schema import Config
 
 def get_vector2index():
     return faiss.IndexFlatL2(512)
@@ -84,14 +87,20 @@ def mrr_score(model, dict_data, input_shape):
     return mrr
 
 
-if __name__ == '__main__':
-    config = Config()
-
-    model = wrap_resnet_face18(config.use_se)
-    model.load_state_dict(torch.load(os.path.join(config.checkpoints_path, 'resnet18_latest.pth')))
-    model.to('cuda')
+@hydra.main(version_base=None, config_path="config", config_name="config")
+def main(cfg: Config) -> None:
+    model = get_model(cfg.model.backbone)
+    checkpoint_path = os.path.join(cfg.paths.checkpoints_path, f'{cfg.model.backbone}_latest.pth')
+    model.load_state_dict(torch.load(checkpoint_path))
+    device = torch.device('cuda' if cfg.training.use_gpu else 'cpu')
+    model.to(device)
     model.eval()
-    dict_data = read_val(config.val_list, config.train_root)
-    mrr = mrr_score(model, dict_data, config.input_shape)
+
+    dict_data = read_val(cfg.paths.val_list, cfg.paths.train_root)
+    mrr = mrr_score(model, dict_data, tuple(cfg.data.input_shape))
     print("-----------------------------")
     print(f"MRR: {mrr}")
+
+
+if __name__ == '__main__':
+    main()
