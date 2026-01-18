@@ -4,10 +4,8 @@ from torch.utils import data
 from models.focal_loss import FocalLoss
 from models.metrics import *
 from models.model_registry import get_model
-from utils.visualizer import Visualizer
 import time
 import hydra
-from omegaconf import DictConfig, OmegaConf
 from config.config_schema import Config
 from torch.nn import DataParallel
 from torch.optim.lr_scheduler import StepLR
@@ -75,8 +73,8 @@ def main(cfg: Config) -> None:
     inference_times = []
     for i in range(1, cfg.training.max_epoch + 1):
         model.train()
-        for ii, data in enumerate(trainloader):
-            data_input, label = data
+        for ii, batch_data in enumerate(trainloader):
+            data_input, label = batch_data
             data_input = data_input.to(device)
             label = label.to(device).long()
             feature = model(data_input)

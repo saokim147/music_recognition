@@ -258,6 +258,9 @@ class ResNet(nn.Module):
 def resnet18(pretrained=False, **kwargs):
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
 
+def resnet34(pretrained=False, **kwargs):
+    return ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
+
 
 class WrapModule(nn.Module):
     def __init__(self, block, layers, use_se=True, **kwargs):
