@@ -21,7 +21,15 @@ def get_feature(model, image):
     with torch.no_grad():
         output = model(data)
     output = output.cpu().detach().numpy()
-    output = normalize(output).flatten()
+    # Handle potential NaN values
+    if np.isnan(output).any():
+        output = np.nan_to_num(output, nan=0.0)
+    # Avoid division by zero in normalization
+    norm = np.linalg.norm(output)
+    if norm < 1e-10:
+        output = np.ones_like(output) / np.sqrt(output.size)
+    else:
+        output = normalize(output).flatten()
     return np.matrix(output)
 
 
